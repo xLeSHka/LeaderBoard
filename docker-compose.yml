@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  leaderboard:
+    container_name: leaderboard
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    environment:
+      - SERVER_PORT=9090
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 10s
+      start_interval: 5s
+volumes:
+  redis_data:
+networks:
+  default:
